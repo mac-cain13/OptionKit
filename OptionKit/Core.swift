@@ -169,6 +169,7 @@ public typealias ParseData = ([Option:[String]], [String])
 /// This is the workhorse of the library. It is initialized with a list of options and parses an
 /// array of strings assumed to be the call paramerers.
 public struct OptionParser {
+    public let helpOption:Option
     public let definitions:[Option]
     
     /// Initializes the parser.
@@ -179,7 +180,7 @@ public struct OptionParser {
     /// - parameter definitions: the option definitions to parse for.
     /// - returns: a parser
     public init(definitions defs:[Option] = []) {
-        let helpOption = Option(trigger:.Mixed("h", "help"), helpDescription: "Display command help.")
+        helpOption = Option(trigger:.Mixed("h", "help"), helpDescription: "Display command help.")
         if defs.contains(helpOption) {
             self.definitions = defs
         } else {
