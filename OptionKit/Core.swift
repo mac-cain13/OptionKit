@@ -82,7 +82,7 @@ public struct Option : Equatable, CustomStringConvertible, CustomDebugStringConv
     ///
     /// - parameter str: the string.
     /// - returns: `true` if the string matches this option's trigger, `false` otherwise.
-    func matches(str:String) -> Bool {
+    func matches(_ str:String) -> Bool {
         switch self.trigger {
         case .Short(let char):
             return str == "-" + String(char)
@@ -93,7 +93,7 @@ public struct Option : Equatable, CustomStringConvertible, CustomDebugStringConv
         }
     }
     
-    static func isValidOptionString(str:String) -> Bool{
+    static func isValidOptionString(_ str:String) -> Bool{
         let length = str.characters.count
         if length < 2 {
             return false
@@ -104,11 +104,11 @@ public struct Option : Equatable, CustomStringConvertible, CustomDebugStringConv
                 return false
             }
             
-            return str[str.startIndex.advancedBy(1)] != "-"
+          return str[str.index(after: str.startIndex)] != "-"
         }
 
         /* Okay, count greater than 2. Full option! */
-        return str[str.startIndex ... str.startIndex.advancedBy(1)] == "--"
+        return str[str.startIndex ... str.index(after:str.startIndex)] == "--"
     }
 
     public var description: String {
@@ -195,7 +195,7 @@ public struct OptionParser {
     ///
     /// - parameter commandName: the name of the command.
     /// - returns: an English-language string suitable for command-line display.
-    public func helpStringForCommandName(commandName:String) -> String {
+    public func helpString(for commandName:String) -> String {
         let maximumLineWidth = 80
         
         // The leading string, to properly indent.
@@ -276,7 +276,7 @@ public struct OptionParser {
         return (dict, args)
     }
 
-    private func parseNewFlag(current: ([OptionData], [String]), flagCandidate:String) throws -> ([OptionData], [String]) {
+    private func parseNewFlag(_ current: ([OptionData], [String]), flagCandidate:String) throws -> ([OptionData], [String]) {
         /* Does the next element want to be a flag? */
         if Option.isValidOptionString(flagCandidate) {
             for flag in self.definitions {
@@ -292,14 +292,13 @@ public struct OptionParser {
         return (current.0, current.1 + [flagCandidate])
     }
     
-    static func normalizeParameters(parameters:[String]) -> [String] {
+    static func normalizeParameters(_ parameters:[String]) -> [String] {
         return parameters.reduce([String]()) { memo, next in
-            let index = next.startIndex.advancedBy(0)
-            if next[index] != "-" {
+            if next[next.startIndex] != "-" {
                 return memo + [next]
             }
             
-            let secondIndex = index.advancedBy(1)
+            let secondIndex = next.index(after: next.startIndex)
             if next[secondIndex] == "-" {
                 /* Assume everything that follows is valid. */
                 return memo + [next]
@@ -307,7 +306,7 @@ public struct OptionParser {
             
             /* Okay, we have one or more single-character flags. */
             var params = [String]()
-            for char in next[secondIndex..<next.startIndex.advancedBy(2)].characters {
+            for char in next[secondIndex..<next.index(after: secondIndex)].characters {
                 params += ["-\(char)"]
             }
             
@@ -341,7 +340,7 @@ private func ==(lhs:OptionData, rhs:OptionData) -> Bool {
 
 /// MARK: - Error types
 
-public enum OptionKitError: ErrorType {
+public enum OptionKitError: ErrorProtocol {
   case InvalidOption(description: String)
 }
 
